@@ -10,7 +10,10 @@ CONDITION_LIMIT = 1.0e10
 
 
 def _require_finite(name: str, values: np.ndarray, frequencies: np.ndarray) -> None:
-    bad = np.flatnonzero(~(np.isfinite(values.real) & np.isfinite(values.imag)))
+    finite = np.isfinite(values.real) & np.isfinite(values.imag)
+    if finite.ndim > 1:
+        finite = finite.reshape(frequencies.size, -1).all(axis=1)
+    bad = np.flatnonzero(~finite)
     if bad.size:
         index = int(bad[0])
         raise ComputationError(f"non-finite value while processing {name}", frequency_hz=float(frequencies[index]))

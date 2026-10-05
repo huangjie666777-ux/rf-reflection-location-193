@@ -139,7 +139,7 @@ def write_touchstone(frequencies: np.ndarray, s_parameters: np.ndarray, referenc
     lines = ["# Hz S RI R {:.12g}".format(reference_impedance), "! Hz S11_real S11_imag S21_real S21_imag S12_real S12_imag S22_real S22_imag"]
     for frequency, matrix in zip(frequencies, s_parameters, strict=True):
         order = (matrix[0, 0], matrix[1, 0], matrix[0, 1], matrix[1, 1])
-        values = [f"{frequency:.12g}"]
+        values = [f"{frequency:.17g}"]
         for value in order:
             values.extend((f"{value.real:.17g}", f"{value.imag:.17g}"))
         lines.append(" ".join(values))

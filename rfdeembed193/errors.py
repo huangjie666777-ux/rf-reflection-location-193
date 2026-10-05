@@ -13,3 +13,7 @@ class ComputationError(ValueError):
             super().__init__(message)
         else:
             super().__init__(f"{message} (frequency: {frequency_hz:g} Hz)")
+
+
+class ParameterError(ValueError):
+    """Invalid reflection-localization parameter."""
