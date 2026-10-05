@@ -30,5 +30,40 @@ class DeembeddingResult:
     max_reembed_abs_error: float
 
 
+@dataclass(frozen=True)
+class ReflectionConfig:
+    velocity: float
+    range_start: float
+    range_stop: float
+    amplitude_threshold: float
+    min_peak_distance: float
+    zero_padding: int
+    device_port: int
+
+
+@dataclass(frozen=True)
+class ReflectPeak:
+    distance_m: float
+    time_s: float
+    amplitude: float
+    phase_rad: float
+    complex_value: complex
+    bin_index: int
+
+
+@dataclass(frozen=True)
+class ReflectionResult:
+    frequencies: np.ndarray
+    frequency_step_hz: float
+    transform_size: int
+    window_weight_sum: float
+    times_s: np.ndarray
+    distances_m: np.ndarray
+    trajectory: np.ndarray
+    peaks: list[ReflectPeak]
+    config: ReflectionConfig
+    deembedding: DeembeddingResult
+
+
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()

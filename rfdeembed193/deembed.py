@@ -133,11 +133,29 @@ def deembed(
     left_t = s_to_transmission(left_s, frequencies, "aligned left fixture")
     right_t = s_to_transmission(right_s, frequencies, "aligned right fixture")
     # Cascade order is T_measurement = T_left @ T_device @ T_right.
-    left_removed = np.linalg.solve(left_t, measured_t)
-    device_t = np.linalg.solve(
-        right_t.swapaxes(-2, -1),
-        left_removed.swapaxes(-2, -1),
-    ).swapaxes(-2, -1)
+    try:
+        left_removed = np.linalg.solve(left_t, measured_t)
+        device_t = np.linalg.solve(
+            right_t.swapaxes(-2, -1),
+            left_removed.swapaxes(-2, -1),
+        ).swapaxes(-2, -1)
+    except np.linalg.LinAlgError:
+        for index, (left_matrix, right_matrix, measured_matrix) in enumerate(
+            zip(left_t, right_t, measured_t, strict=True)
+        ):
+            try:
+                candidate = np.linalg.solve(right_matrix.T, np.linalg.solve(left_matrix, measured_matrix).T).T
+            except np.linalg.LinAlgError as exc:
+                raise ComputationError(
+                    "singular matrix encountered during cascade inversion",
+                    frequency_hz=float(frequencies[index]),
+                ) from exc
+            if not np.all(np.isfinite(candidate)):
+                raise ComputationError(
+                    "non-finite matrix encountered during cascade inversion",
+                    frequency_hz=float(frequencies[index]),
+                )
+        raise
     _require_finite("de-embedded device transmission matrix", device_t, frequencies)
     device_s = transmission_to_s(device_t, frequencies, "de-embedded device")
 
